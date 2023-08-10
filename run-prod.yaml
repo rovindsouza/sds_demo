@@ -1,0 +1,10 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: deploy-demo-prod
+spec:
+  template:
+    spec:
+      containers:
+      - name: my-app-image
+        image: us-central1-docker.pkg.dev/rovin-sds-dev/sds-demo/demo

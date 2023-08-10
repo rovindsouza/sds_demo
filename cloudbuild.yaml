@@ -1,0 +1,65 @@
+steps:
+   - id: build
+     name: gcr.io/cloud-builders/docker
+     entrypoint: /bin/bash
+     args:
+     - -c
+     - |
+      docker build -t $_IMAGE -f ./Dockerfile . &&
+       docker image inspect $_IMAGE --format \
+       '{{index .RepoTags 0}}@{{.Id}}' > /workspace/image-digest.txt &&
+       cat image-digest.txt
+   - id: scan
+     name: gcr.io/google.com/cloudsdktool/cloud-sdk
+     entrypoint: /bin/bash
+     args:
+     - -c 
+     - |
+       gcloud artifacts docker images scan $_IMAGE \
+       --format='value(response.scan)' > /workspace/scan_id.txt
+   - id: severity check
+     name: gcr.io/google.com/cloudsdktool/cloud-sdk
+     entrypoint: /bin/bash
+     args:
+     - -c
+     - |
+       gcloud artifacts docker images list-vulnerabilities $(cat /workspace/scan_id.txt) \
+       --format='value(vulnerability.effectiveSeverity)' | if grep -Exq $_SEVERITY; \
+       then echo 'Failed vulnerability check' && exit 1; else exit 0; fi
+   - id: push
+     name: gcr.io/cloud-builders/docker
+     entrypoint: /bin/bash
+     args:
+     - -c
+     - |
+       docker push $_IMAGE
+   - id: 'create-attestation'
+     name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+     entrypoint: /bin/bash
+     args:
+          - -c
+          - | 
+            gcloud beta container binauthz attestations sign-and-create \
+            --project="rovin-sds-dev" \
+            --artifact-url="`gcloud artifacts docker images list $_IMAGE --include-tags | grep latest | awk '{print $1"@"$2}'`" \
+            --attestor=$_ATTESTOR \
+            --keyversion-location=global \
+            --keyversion-keyring=$_KEY_RING \
+            --keyversion-key=$_KEY \
+            --keyversion=1 \
+   - id: deploy
+     name       : gcr.io/google.com/cloudsdktool/cloud-sdk
+     entrypoint : /bin/bash
+     args :
+     - -c
+     - |
+       gcloud deploy releases create test-release-4 --project=$_PROJECT_ID   --region=us-central1   --delivery-pipeline=$_PIPELINE_ID          
+images: [$_IMAGE]
+
+
+substitutions:
+  _SEVERITY: "CRITICAL"
+
+options:
+  dynamic_substitutions: true
+  requestedVerifyOption: VERIFIED
