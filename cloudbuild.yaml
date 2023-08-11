@@ -63,3 +63,5 @@ substitutions:
 options:
   dynamic_substitutions: true
   requestedVerifyOption: VERIFIED
+  logging: CLOUD_LOGGING_ONLY
+
