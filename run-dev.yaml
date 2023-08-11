@@ -7,4 +7,4 @@ spec:
     spec:
       containers:
       - name: my-app-image
-        image: us-central1-docker.pkg.dev/rovin-sds-dev/sds-demo/demo
+        image: us-docker.pkg.dev/cloudrun/container/hello 
