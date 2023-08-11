@@ -40,7 +40,7 @@ steps:
           - -c
           - | 
             gcloud beta container binauthz attestations sign-and-create \
-            --project="rovin-sds-dev" \
+            --project=$_PROJECT_ID \
             --artifact-url="`gcloud artifacts docker images list $_IMAGE --include-tags | grep latest | awk '{print $1"@"$2}'`" \
             --attestor=$_ATTESTOR \
             --keyversion-location=global \
