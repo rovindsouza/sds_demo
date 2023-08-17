@@ -7,5 +7,5 @@ RUN pip3 install -r requirements.txt  --index-url https://_json_key_base64:KEY=@
 
 COPY ./sample_app .
 
-CMD [ "python3", "main.py"]
+CMD [ "python3", "app.py"]
 EXPOSE 8080

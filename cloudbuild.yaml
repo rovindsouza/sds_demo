@@ -53,7 +53,7 @@ steps:
      args :
      - -c
      - |
-       gcloud deploy releases create test-release-4 --project=$_PROJECT_ID   --region=us-central1   --delivery-pipeline=$_PIPELINE_ID          
+       gcloud deploy releases create test-release-1 --project=$_PROJECT_ID   --region=us-central1   --delivery-pipeline=$_PIPELINE_ID          
 images: [$_IMAGE]
 
 
